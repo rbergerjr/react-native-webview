@@ -140,13 +140,15 @@ namespace winrt::ReactNativeWebView::implementation {
     }
 
     void ReactWebView2::WriteWebViewNavigationEventArg(mux::WebView2 const& sender, winrt::IJSValueWriter const& eventDataWriter) {
-        auto tag = this->GetValue(winrt::FrameworkElement::TagProperty()).as<winrt::IPropertyValue>().GetInt64();
         WriteProperty(eventDataWriter, L"canGoBack", sender.CanGoBack());
         WriteProperty(eventDataWriter, L"canGoForward", sender.CanGoForward());
         if (Is17763OrHigher()) {
             WriteProperty(eventDataWriter, L"loading", !sender.IsLoaded());
         }
-        WriteProperty(eventDataWriter, L"target", tag);
+        if (auto tag = this->GetValue(winrt::FrameworkElement::TagProperty())
+                    .as<winrt::IPropertyValue>()) {
+            WriteProperty(eventDataWriter, L"target", tag.GetInt64());
+        }
         if (auto uri = sender.Source()) {
             WriteProperty(eventDataWriter, L"url", uri.AbsoluteCanonicalUri());
         }
